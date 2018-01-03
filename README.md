@@ -1,4 +1,5 @@
 # pi-hole-dhcp-to-hosts
+[![Build Status](https://travis-ci.org/npwolf/pi-hole-dhcp-to-hosts.svg?branch=master)](https://travis-ci.org/npwolf/pi-hole-dhcp-to-hosts)
 
 Keep DNS updated with DHCP reservations in dnsmasq even if they're not active. 
 
