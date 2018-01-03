@@ -4,7 +4,8 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install tox
+  # Switched to tox-travis due to 3.6 errors: https://github.com/pytest-dev/pytest/issues/2779
+  - pip install tox-travis
 # command to run tests
 script:
   - tox
