@@ -2,7 +2,6 @@
 import pytest
 import os
 from mock import mock_open, patch, call
-from StringIO import StringIO
 
 from dhcp_to_hosts import DHCPRecord, Dhcp2Hosts
 
