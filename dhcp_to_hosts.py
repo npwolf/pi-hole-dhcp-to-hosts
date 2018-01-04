@@ -60,6 +60,7 @@ class Dhcp2Hosts(object):
         with open(self.dhcp_hostsfile, 'r') as hosts_fh:
             contents = hosts_fh.read()
         matches = re.findall(self.DHCP_HOSTSFILE_REGEX, contents, re.IGNORECASE|re.MULTILINE)
+        log.debug("Found %s DHCP reservations.", len(matches))
         self.dhcp_records = []
         for match in matches:
             self.dhcp_records.append(DHCPRecord(host=match[1], ip=match[0]))
@@ -79,9 +80,11 @@ class Dhcp2Hosts(object):
         # allows needs_update to function
         dhcp_file_stat = os.stat(self.dhcp_hostsfile)
 
+        self.read_dhcp_records()
+
         # Read in current hosts contents
-        with open(self.dhcp_hostsfile, 'r') as hosts_fh:
-            contents = hosts_fh.read()
+        with open(self.HOSTS_FILE, 'r') as dhcp_hosts_fh:
+            contents = dhcp_hosts_fh.read()
         
         # Remove any auto generated block that exists
         block_re = re.compile(re.escape(Dhcp2Hosts.SECTION_HEADER) + r'.*' + re.escape(Dhcp2Hosts.SECTION_FOOTER), re.MULTILINE|re.DOTALL)

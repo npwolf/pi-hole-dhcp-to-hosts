@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import pytest
 import os
+import types
 from mock import mock_open, patch, call
 
 from dhcp_to_hosts import DHCPRecord, Dhcp2Hosts
@@ -61,29 +62,32 @@ def test_get_generated_block(dhcp2hosts):
 @patch('dhcp_to_hosts.os.stat')
 def test_update_hosts_opens_files(_mock_utime, _mock_stat, dhcp2hosts):
     with patch('dhcp_to_hosts.open', mock_open(read_data='')) as mock_open_cm:
-        mock_open_cm().read.return_value = HostsTestData.contents_before
         dhcp2hosts.update()
+    mock_open_cm.assert_any_call(Dhcp2Hosts.HOSTS_FILE, 'r')
     mock_open_cm.assert_any_call(Dhcp2Hosts.HOSTS_FILE, 'w')
-    mock_open_cm.assert_any_call('simulated_file', 'r')
 
 @patch('dhcp_to_hosts.os.utime')
 @patch('dhcp_to_hosts.os.stat')
 def test_update_hosts(_mock_utime, _mock_stat, dhcp2hosts):
-    with patch('dhcp_to_hosts.open', mock_open(read_data=HostsTestData.contents_before)) as mock_open_cm:
-        mock_open_cm().read.return_value = HostsTestData.contents_before
-        dhcp2hosts.dhcp_records = DHCPHostsTestData.records
-        dhcp2hosts.update()
-    mock_open_cm().write.assert_called_once_with(HostsTestData.contents_after)
+    def fake_read_dhcp_records(self):
+        self.dhcp_records = DHCPHostsTestData.records
+    with patch.object(Dhcp2Hosts, 'read_dhcp_records', autospec=True, side_effect=fake_read_dhcp_records):
+        with patch('dhcp_to_hosts.open', mock_open(read_data=HostsTestData.contents_before)) as mock_open_cm:
+            mock_open_cm().read.return_value = HostsTestData.contents_before
+            dhcp2hosts.update()
+        mock_open_cm().write.assert_called_once_with(HostsTestData.contents_after)
 
 @patch('dhcp_to_hosts.os.utime')
 @patch('dhcp_to_hosts.os.stat')
 def test_update_hosts_idempotent(_mock_utime, _mock_stat, dhcp2hosts):
     """Make sure already updated contents aren't changed."""
-    with patch('dhcp_to_hosts.open', mock_open(read_data=HostsTestData.contents_before)) as mock_open_cm:
-        mock_open_cm().read.return_value = HostsTestData.contents_after
-        dhcp2hosts.dhcp_records = DHCPHostsTestData.records
-        dhcp2hosts.update()
-    mock_open_cm().write.assert_called_once_with(HostsTestData.contents_after)
+    def fake_read_dhcp_records(self):
+        self.dhcp_records = DHCPHostsTestData.records
+    with patch.object(Dhcp2Hosts, 'read_dhcp_records', autospec=True, side_effect=fake_read_dhcp_records):
+        with patch('dhcp_to_hosts.open', mock_open(read_data=HostsTestData.contents_before)) as mock_open_cm:
+            mock_open_cm().read.return_value = HostsTestData.contents_after
+            dhcp2hosts.update()
+        mock_open_cm().write.assert_called_once_with(HostsTestData.contents_after)
 
 @patch('dhcp_to_hosts.os.utime')
 def test_update_modifies_hosts_modification_time(mock_utime, dhcp2hosts):
