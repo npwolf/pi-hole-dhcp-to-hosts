@@ -99,16 +99,21 @@ class Dhcp2Hosts(object):
             os.utime(self.HOSTS_FILE, (dhcp_file_stat.st_atime, dhcp_file_stat.st_mtime))
         log.debug("Completed updating '%s' from data in '%s'", self.HOSTS_FILE, self.dhcp_hostsfile)
 
-if __name__ == '__main__':
+def get_args(args):
+    """Parse command line"""
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
     parser = argparse.ArgumentParser(description='Read in dnsmasq dhcp host file and write out hosts and IPs to /etc/hosts')
     parser.add_argument('--dhcp_hostsfile', required=True, help="DHCP Host file") 
-    args = parser.parse_args()
-  
-    dhcp2hosts = Dhcp2Hosts(args.dhcp_hostsfile)
+    return parser.parse_args(args)
+
+def run(args):
+    parsed_args = get_args(args)
+    dhcp2hosts = Dhcp2Hosts(parsed_args.dhcp_hostsfile)
     if dhcp2hosts.needs_update():
        dhcp2hosts.update() 
     else:
         log.info("No update needed.")
-    
+
+if __name__ == '__main__':
+    run(sys.argv[1:]) 
 

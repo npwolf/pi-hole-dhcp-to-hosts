@@ -4,6 +4,7 @@ import os
 import types
 from mock import mock_open, patch, call
 
+import dhcp_to_hosts
 from dhcp_to_hosts import DHCPRecord, Dhcp2Hosts
 
 class DHCPHostsTestData(object):
@@ -105,6 +106,29 @@ def test_needs_update_false(dhcp2hosts):
 def test_needs_update_true(dhcp2hosts):
     with patch('dhcp_to_hosts.os.path.getmtime', side_effect=[1330712292, 1230712293]):
         assert dhcp2hosts.needs_update() == True
+
+def test_get_args_no_args():
+    with pytest.raises(SystemExit):
+        dhcp_to_hosts.get_args([])
+
+def test_get_args_help():
+    with pytest.raises(SystemExit):
+        dhcp_to_hosts.get_args(['--help'])
+
+@patch.object(Dhcp2Hosts, 'needs_update', autospec=True, return_value=True)
+@patch.object(Dhcp2Hosts, 'update', autospec=True)
+def test_run_needs_update(mock_needs_update, mock_update):
+    fake_file = 'fake_file' 
+    def verify_fake_file_passed_in(self):
+        assert self.dhcp_hostsfile == fake_file
+    mock_update.side_effect = verify_fake_file_passed_in
+    dhcp_to_hosts.run(['--dhcp_hostsfile', fake_file])
+    assert mock_update.called
+
+@patch.object(Dhcp2Hosts, 'needs_update', autospec=True, return_value=False)
+def test_run_no_update_needed(mock_needs_update):
+    dhcp_to_hosts.run(['--dhcp_hostsfile', 'fake_file'])
+    assert mock_needs_update.called
 
 if __name__ == '__main__':
     pytest.main()
