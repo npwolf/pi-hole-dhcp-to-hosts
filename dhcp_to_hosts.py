@@ -80,7 +80,7 @@ class Dhcp2Hosts(object):
         dhcp_file_stat = os.stat(self.dhcp_hostsfile)
 
         # Read in current hosts contents
-        with open(self.HOSTS_FILE, 'r') as hosts_fh:
+        with open(self.dhcp_hostsfile, 'r') as hosts_fh:
             contents = hosts_fh.read()
         
         # Remove any auto generated block that exists

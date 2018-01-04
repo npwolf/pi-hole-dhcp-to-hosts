@@ -59,6 +59,15 @@ def test_get_generated_block(dhcp2hosts):
 
 @patch('dhcp_to_hosts.os.utime')
 @patch('dhcp_to_hosts.os.stat')
+def test_update_hosts_opens_files(_mock_utime, _mock_stat, dhcp2hosts):
+    with patch('dhcp_to_hosts.open', mock_open(read_data='')) as mock_open_cm:
+        mock_open_cm().read.return_value = HostsTestData.contents_before
+        dhcp2hosts.update()
+    mock_open_cm.assert_any_call(Dhcp2Hosts.HOSTS_FILE, 'w')
+    mock_open_cm.assert_any_call('simulated_file', 'r')
+
+@patch('dhcp_to_hosts.os.utime')
+@patch('dhcp_to_hosts.os.stat')
 def test_update_hosts(_mock_utime, _mock_stat, dhcp2hosts):
     with patch('dhcp_to_hosts.open', mock_open(read_data=HostsTestData.contents_before)) as mock_open_cm:
         mock_open_cm().read.return_value = HostsTestData.contents_before
