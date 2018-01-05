@@ -4,6 +4,7 @@ import re
 import argparse
 import os.path
 import os
+import sys
 from functools import total_ordering
 
 log = logging.getLogger(__name__)
