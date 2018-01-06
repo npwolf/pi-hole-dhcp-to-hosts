@@ -2,7 +2,7 @@
 set -e
 # This will install dhcp_to_hosts.py to your system.
 # Run the following to install directly:
-# curl -sSL https://raw.githubusercontent.com/npwolf/pi-hole-dhcp-to-hosts/master/install.sh | sudo bash 
+# curl -sSL https://raw.githubusercontent.com/npwolf/pi-hole-dhcp-to-hosts/master/install.sh | sudo bash
 
 PROGRAM="dhcp_to_hosts.py"
 DESTINATION="/usr/local/bin/${PROGRAM}"
@@ -12,7 +12,7 @@ DHCP_HOSTS_FILE="/etc/dnsmasq.d/04-pihole-static-dhcp.conf"
 # We'll setup to run this every 5 minutes via cron
 CRONTAB_FREQUENCY='*/5 * * * * '
 CRONTAB="# Created by https://github.com/npwolf/pi-hole-dhcp-to-hosts
-${CRONTAB_FREQUENCY} ${DESTINATION} --dhcp_hostsfile ${DHCP_HOSTS_FILE} > ${LOG_FILE} 2>&1"
+${CRONTAB_FREQUENCY}    root    PATH="$PATH:/usr/local/bin" ${DESTINATION} --dhcp_hostsfile ${DHCP_HOSTS_FILE} > ${LOG_FILE} 2>&1"
 CRONTAB_FILE="/etc/cron.d/dhcp_to_hosts"
 
 if [[ $EUID -ne 0 ]]; then
